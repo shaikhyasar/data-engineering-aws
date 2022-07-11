@@ -1,0 +1,2 @@
+SELECT customer_id, COUNT(transaction_id) as num_of_operations, ROUND(SUM(unit_price * quantity),2) as revenue, datetime FROM transactions
+SELECT customer_id, COUNT(num_of_operations) as num_of_operations, ROUND(revenue,2) as revenue, time(datetime) FROM transactions GROUP BY customer_id, time(datetime) ORDER BY time(datetime)

@@ -1,0 +1,8 @@
+boto3
+apache_airflow
+pandas
+elasticsearch
+faker
+psycopg2-binary
+pytest
+typer

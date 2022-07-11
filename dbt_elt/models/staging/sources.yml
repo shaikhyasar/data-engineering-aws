@@ -1,0 +1,53 @@
+version: 2
+sources:
+  - name: accounts
+    database: dbt-fundamentals-348920
+    schema: alizza
+    tables:
+      - name: accounts_customuser
+  - name: coc_accounts
+    database: dbt-fundamentals-348920
+    schema: alizza
+    tables:
+      - name: coc_accounts_coc_account
+  - name: credit_transactions
+    database: dbt-fundamentals-348920
+    schema: alizza
+    tables:
+      - name: credit_transactions_earn_credit
+  - name: enterprises
+    database: dbt-fundamentals-348920
+    schema: alizza
+    tables:
+      - name: enterprise_enterprises
+  - name: organizations
+    database: dbt-fundamentals-348920
+    schema: alizza
+    tables:
+      - name: organizations_organization
+  - name: transactions
+    database: dbt-fundamentals-348920
+    schema: alizza
+    tables:
+      - name: transactions_transaction
+      - name: transactions_transaction_report
+      - name: transactions_wallet_to_wallet
+  - name: trust_accounts
+    database: dbt-fundamentals-348920
+    schema: alizza
+    tables:
+      - name: trust_accounts_trust_account
+  - name: wallets
+    database: dbt-fundamentals-348920
+    schema: alizza
+    tables:
+      - name: wallets_coc_account_wallet
+      - name: wallets_enterprise_account_wallet
+      - name: wallets_non_user_wallet
+      - name: wallets_operational_wallet
+      - name: wallets_organization_wallet
+      - name: wallets_trust_account_wallet
+      - name: wallets_user_wallet
+      - name: wallets_wallet
+
+

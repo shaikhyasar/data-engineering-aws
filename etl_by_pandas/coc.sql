@@ -1,0 +1,1 @@
+select * from coc_accounts_coc_account order by created_at desc limit 20
