@@ -35,7 +35,6 @@ def csvtoparquet(event, context):
         dataset=True,
         database=db_name,
         table=table_name,
-
         mode="append")
     print("RESULT: ")
     print(f'{result}')
