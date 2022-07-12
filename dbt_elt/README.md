@@ -1,6 +1,5 @@
-Welcome to your new dbt project!
+Welcome to your new dbt project for generating report!
 
-### Using the starter project
 
 Try running the following commands:
 - dbt run

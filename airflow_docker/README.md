@@ -21,7 +21,7 @@ source venv/bin/activate
 
 Windows:
 ```
-. venv\Scripts\activate
+venv\Scripts\activate
 ```
 
 ```
