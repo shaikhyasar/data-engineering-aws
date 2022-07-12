@@ -1,74 +1,36 @@
-<!--
-title: 'AWS Python Example'
-description: 'This template demonstrates how to deploy a Python function running on AWS Lambda using the traditional Serverless Framework.'
-layout: Doc
-framework: v3
-platform: AWS
-language: python
-priority: 2
-authorLink: 'https://github.com/serverless'
-authorName: 'Serverless, inc.'
-authorAvatar: 'https://avatars1.githubusercontent.com/u/13742415?s=200&v=4'
--->
 
+# Convert the CSV file to Parquet file by AWS Lambda using Serverless
 
-# Serverless Framework AWS Python Example
+The repo will convert csv file from S3 bucket to Parquet file to specified s3 bucket location. Using serverless module which will be helpful to build lambda function in the local.
 
-This template demonstrates how to deploy a Python function running on AWS Lambda using the traditional Serverless Framework. The deployed function does not include any event definitions as well as any kind of persistence (database). For more advanced configurations check out the [examples repo](https://github.com/serverless/examples/) which includes integrations with SQS, DynamoDB or examples of functions that are triggered in `cron`-like manner. For details about configuration of specific `events`, please refer to our [documentation](https://www.serverless.com/framework/docs/providers/aws/events/).
-
-## Usage
-
-### Deployment
-
-In order to deploy the example, you need to run the following command:
+## About the setup
+In order to deploy the this repo, you need to run the following command:
+```
+$ npm install -g serverless
+```
+You need to install **AWS CLI** in your local and configure your aws, so that, serverless can able to deploy the aws lambda on your behalf
 
 ```
-$ serverless deploy
+aws configure
+```
+You will be prompt to enter those values. You can able to get in IAM (Identity and Access Management)
+```
+AWS Access Key ID :
+AWS Secret Access Key :
+Default region name:
+Default output format:
 ```
 
-After running deploy, you should see output similar to:
 
-```bash
-Deploying aws-python-project to stage dev (us-east-1)
-
-✔ Service deployed to stack aws-python-project-dev (112s)
-
-functions:
-  hello: aws-python-project-dev-hello (1.5 kB)
-```
-
-### Invocation
-
-After successful deployment, you can invoke the deployed function by using the following command:
-
-```bash
-serverless invoke --function hello
-```
-
-Which should result in response similar to the following:
-
-```json
-{
-    "statusCode": 200,
-    "body": "{\"message\": \"Go Serverless v3.0! Your function executed successfully!\", \"input\": {}}"
-}
-```
-
-### Local development
-
-You can invoke your function locally by using the following command:
-
-```bash
-serverless invoke local --function hello
-```
-
-Which should result in response similar to the following:
+## About the code
+Import the required package. There are some external package needed inorder to use. In lambda, you cannot use **requirements.txt** to install external package. in console level, you need to dockerize the external package and place it as a layer, so that, your function can access those packages. Check below to see, how to achieve to install external packages
 
 ```
-{
-    "statusCode": 200,
-    "body": "{\"message\": \"Go Serverless v3.0! Your function executed successfully!\", \"input\": {}}"
-}
+import json
+import awswrangler as wr
+from urllib.parse import unquote_plus
+import os
+import boto3
 ```
 
 ### Bundling dependencies
@@ -80,3 +42,84 @@ serverless plugin install -n serverless-python-requirements
 ```
 
 Running the above will automatically add `serverless-python-requirements` to `plugins` section in your `serverless.yml` file and add it as a `devDependency` to `package.json` file. The `package.json` file will be automatically created if it doesn't exist beforehand. Now you will be able to add your dependencies to `requirements.txt` file (`Pipfile` and `pyproject.toml` is also supported but requires additional configuration) and they will be automatically injected to Lambda package during build process. For more details about the plugin's configuration, please refer to [official documentation](https://github.com/UnitedIncome/serverless-python-requirements).
+
+
+When the trigger happened (In our case, new csv file is uploaded to specified s3 location), the lambda function will be triggered.
+```
+for record in event['Records']:
+    bucket = record['s3']['bucket']['name']
+    key = unquote_plus(record['s3']['object']['key'])
+```
+In above code, we are getting the bucket name and file path, we can use those values to recreate same path for our new converted file.
+
+Now we are creating database name and table name from the file path, because we are going to add it in AWS Glue, where AWS Athena and AWS Redshift can able to do sql query on s3 directly
+```
+key_list = key.split("/")
+db_name = key_list[len(key_list)-3]
+table_name = key_list[len(key_list)-2]
+current_databases = wr.catalog.databases()
+if db_name not in current_databases.values:
+    print(f'- Database {db_name} does not exist ... creating')
+    wr.catalog.create_database(db_name)    
+else:
+    print(f'- Database {db_name} already exists')
+```
+Now, we are converting csv to parquet using AWS wrangler to_parquet method. The file will be appened if that specified file already exist.
+```
+result = wr.s3.to_parquet(
+        df=input_df,
+        path=output_path,
+        dataset=True,
+        database=db_name,
+        table=table_name,
+        mode="append")
+```
+We can check AWS Cloudwatch to check the logs of our print statements
+
+### Deployment
+
+In order to deploy the this repo, you need to run the following command:
+```
+$ npm install -g serverless
+```
+
+
+```
+$ serverless deploy
+```
+
+### Invocation
+
+After successful deployment, you can invoke the deployed function by using the following command:
+
+```bash
+serverless invoke --function csvtoparquet
+```
+
+Which should result in response similar to the following:
+
+```json
+{
+    "statusCode": 200,
+    "body": "The file has been converted successfully"
+}
+```
+
+### Local development
+
+You can invoke your function locally by using the following command:
+
+```bash
+serverless invoke local --function csvtoparquet
+```
+
+Which should result in response similar to the following:
+
+```
+{
+    "statusCode": 200,
+    "body": "The file has been converted successfully"
+}
+```
+
+
