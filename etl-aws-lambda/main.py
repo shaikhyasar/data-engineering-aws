@@ -19,7 +19,7 @@ def csvtoparquet(event, context):
     print(f'Table Name: {table_name}')
     input_path = f"s3://{bucket}/{key}"
     print(f'Input_Path: {input_path}')
-    output_path = f"s3://{os.environ(['CLEAN_BUCKET_NAME'])}/{db_name}/{table_name}"
+    output_path = f"s3://{os.environ['CLEAN_BUCKET_NAME']}/{db_name}/{table_name}"
     print(f'Output_Path: {output_path}')
     input_df = wr.s3.read_csv([input_path])
     current_databases = wr.catalog.databases()

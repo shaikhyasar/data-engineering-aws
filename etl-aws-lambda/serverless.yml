@@ -9,7 +9,7 @@ provider:
   iam:
     role: e
   environment:
-    CLEAN_BUCKET_NAME: data-eng-clean-shaik
+    CLEAN_BUCKET_NAME: {}
   
 
 functions:
@@ -17,7 +17,7 @@ functions:
     handler: main.csvtoparquet
     events:
       - s3:
-          bucket: a
+          bucket: {}
           event: s3:ObjectCreated:*
           rules:
             - suffix: .csv
